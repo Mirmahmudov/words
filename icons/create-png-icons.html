@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create PNG Icons</title>
+</head>
+<body>
+    <h1>PNG Icon Creator</h1>
+    <p>Bu sahifani brauzerda oching va ikonlarni yuklab oling.</p>
+    
+    <div id="icons-container"></div>
+
+    <script>
+        // Create canvas and draw icon
+        function createIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            
+            // Draw background with rounded corners
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            const radius = size * 0.15;
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(size - radius, 0);
+            ctx.quadraticCurveTo(size, 0, size, radius);
+            ctx.lineTo(size, size - radius);
+            ctx.quadraticCurveTo(size, size, size - radius, size);
+            ctx.lineTo(radius, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw book
+            const bookWidth = size * 0.5;
+            const bookHeight = size * 0.6;
+            const bookX = (size - bookWidth) / 2;
+            const bookY = size * 0.2;
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(bookX, bookY, bookWidth, bookHeight);
+            
+            // Draw book spine
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.fillRect(bookX, bookY, size * 0.03, bookHeight);
+            
+            // Draw emoji and text
+            const fontSize = size * 0.15;
+            ctx.font = `${fontSize}px Arial`;
+            ctx.fillStyle = '#667eea';
+            ctx.textAlign = 'center';
+            ctx.fillText('📘', size / 2, bookY + bookHeight * 0.4);
+            
+            const smallFont = size * 0.08;
+            ctx.font = `bold ${smallFont}px Arial`;
+            ctx.fillText('EN→UZ', size / 2, bookY + bookHeight * 0.7);
+            
+            return canvas.toDataURL('image/png');
+        }
+
+        // Icon sizes to generate
+        const iconSizes = [
+            { name: 'icon-72x72.png', size: 72 },
+            { name: 'icon-96x96.png', size: 96 },
+            { name: 'icon-128x128.png', size: 128 },
+            { name: 'icon-144x144.png', size: 144 },
+            { name: 'icon-152x152.png', size: 152 },
+            { name: 'icon-192x192.png', size: 192 },
+            { name: 'icon-384x384.png', size: 384 },
+            { name: 'icon-512x512.png', size: 512 },
+            { name: 'favicon-16x16.png', size: 16 },
+            { name: 'favicon-32x32.png', size: 32 },
+            { name: 'apple-touch-icon.png', size: 180 }
+        ];
+
+        const container = document.getElementById('icons-container');
+
+        iconSizes.forEach(iconInfo => {
+            const dataUrl = createIcon(iconInfo.size);
+            
+            // Create preview and download link
+            const div = document.createElement('div');
+            div.style.margin = '10px';
+            div.style.display = 'inline-block';
+            div.style.textAlign = 'center';
+            
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            img.style.width = '64px';
+            img.style.height = '64px';
+            img.style.border = '1px solid #ccc';
+            img.style.display = 'block';
+            img.style.margin = '0 auto 5px';
+            
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = iconInfo.name;
+            link.textContent = iconInfo.name;
+            link.style.display = 'block';
+            link.style.fontSize = '12px';
+            
+            div.appendChild(img);
+            div.appendChild(link);
+            container.appendChild(div);
+        });
+
+        // Auto-download all icons
+        setTimeout(() => {
+            const links = container.querySelectorAll('a');
+            links.forEach((link, index) => {
+                setTimeout(() => {
+                    link.click();
+                }, index * 200);
+            });
+        }, 1000);
+    </script>
+</body>
+</html>

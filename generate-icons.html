@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+</head>
+<body>
+    <h1>PWA Icon Generator</h1>
+    <p>Bu sahifa avtomatik ravishda ikonlarni yaratadi...</p>
+    
+    <canvas id="canvas" style="display: none;"></canvas>
+    
+    <div id="downloads"></div>
+
+    <script>
+        const sizes = [16, 32, 72, 96, 128, 144, 152, 192, 384, 512];
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const downloadsDiv = document.getElementById('downloads');
+
+        function createIcon(size) {
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            
+            // Draw rounded rectangle background
+            const radius = size * 0.15;
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, radius);
+            ctx.fill();
+            
+            // Draw book
+            const bookWidth = size * 0.53;
+            const bookHeight = size * 0.61;
+            const bookX = (size - bookWidth) / 2;
+            const bookY = size * 0.195;
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.beginPath();
+            ctx.roundRect(bookX, bookY, bookWidth, bookHeight, size * 0.04);
+            ctx.fill();
+            
+            // Draw book spine
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.beginPath();
+            ctx.roundRect(bookX, bookY, size * 0.04, bookHeight, size * 0.02);
+            ctx.fill();
+            
+            // Draw text lines
+            ctx.strokeStyle = 'rgba(102, 126, 234, 0.6)';
+            ctx.lineWidth = size * 0.006;
+            
+            const lineStart = bookX + size * 0.08;
+            const lineY1 = bookY + size * 0.08;
+            const lineY2 = bookY + size * 0.14;
+            const lineY3 = bookY + size * 0.20;
+            const lineY4 = bookY + size * 0.26;
+            
+            // Line 1
+            ctx.beginPath();
+            ctx.moveTo(lineStart, lineY1);
+            ctx.lineTo(lineStart + size * 0.39, lineY1);
+            ctx.stroke();
+            
+            // Line 2
+            ctx.beginPath();
+            ctx.moveTo(lineStart, lineY2);
+            ctx.lineTo(lineStart + size * 0.35, lineY2);
+            ctx.stroke();
+            
+            // Line 3
+            ctx.beginPath();
+            ctx.moveTo(lineStart, lineY3);
+            ctx.lineTo(lineStart + size * 0.37, lineY3);
+            ctx.stroke();
+            
+            // Line 4
+            ctx.beginPath();
+            ctx.moveTo(lineStart, lineY4);
+            ctx.lineTo(lineStart + size * 0.31, lineY4);
+            ctx.stroke();
+            
+            // Draw main text
+            const fontSize = size * 0.047;
+            ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+            ctx.fillStyle = '#667eea';
+            ctx.fillText('APPLE', lineStart, bookY + size * 0.37);
+            
+            // Draw translation
+            const smallFontSize = size * 0.035;
+            ctx.font = `${smallFontSize}px Arial, sans-serif`;
+            ctx.fillStyle = '#764ba2';
+            ctx.fillText('olma', lineStart, bookY + size * 0.43);
+            
+            // Draw decorative circles
+            const circleY = bookY + size * 0.49;
+            const circleRadius = size * 0.016;
+            
+            ctx.fillStyle = 'rgba(40, 167, 69, 0.8)';
+            ctx.beginPath();
+            ctx.arc(lineStart + size * 0.02, circleY, circleRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = 'rgba(255, 193, 7, 0.8)';
+            ctx.beginPath();
+            ctx.arc(lineStart + size * 0.08, circleY, circleRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = 'rgba(220, 53, 69, 0.8)';
+            ctx.beginPath();
+            ctx.arc(lineStart + size * 0.14, circleY, circleRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw star
+            const starX = lineStart + size * 0.25;
+            const starY = circleY;
+            const starSize = size * 0.02;
+            
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.moveTo(starX, starY - starSize);
+            ctx.lineTo(starX + starSize * 0.3, starY - starSize * 0.3);
+            ctx.lineTo(starX + starSize, starY - starSize * 0.3);
+            ctx.lineTo(starX + starSize * 0.5, starY + starSize * 0.2);
+            ctx.lineTo(starX + starSize * 0.8, starY + starSize);
+            ctx.lineTo(starX, starY + starSize * 0.6);
+            ctx.lineTo(starX - starSize * 0.8, starY + starSize);
+            ctx.lineTo(starX - starSize * 0.5, starY + starSize * 0.2);
+            ctx.lineTo(starX - starSize, starY - starSize * 0.3);
+            ctx.lineTo(starX - starSize * 0.3, starY - starSize * 0.3);
+            ctx.closePath();
+            ctx.fill();
+            
+            return canvas.toDataURL('image/png');
+        }
+
+        // Add roundRect method if not available
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+
+        // Generate all icons
+        sizes.forEach(size => {
+            const dataUrl = createIcon(size);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `icon-${size}x${size}.png`;
+            link.href = dataUrl;
+            link.textContent = `Download ${size}x${size} icon`;
+            link.style.display = 'block';
+            link.style.margin = '5px 0';
+            
+            downloadsDiv.appendChild(link);
+        });
+
+        // Generate special icons
+        const specialIcons = [
+            { name: 'favicon-16x16.png', size: 16 },
+            { name: 'favicon-32x32.png', size: 32 },
+            { name: 'apple-touch-icon.png', size: 180 }
+        ];
+
+        specialIcons.forEach(icon => {
+            const dataUrl = createIcon(icon.size);
+            
+            const link = document.createElement('a');
+            link.download = icon.name;
+            link.href = dataUrl;
+            link.textContent = `Download ${icon.name}`;
+            link.style.display = 'block';
+            link.style.margin = '5px 0';
+            link.style.fontWeight = 'bold';
+            
+            downloadsDiv.appendChild(link);
+        });
+
+        console.log('Icons generated successfully!');
+    </script>
+</body>
+</html>

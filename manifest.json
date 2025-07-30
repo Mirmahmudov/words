@@ -1,0 +1,101 @@
+{
+  "name": "My English Words - Inglizcha So'zlar",
+  "short_name": "English Words",
+  "description": "Inglizcha so'zlarni o'yin orqali yodlash uchun dastur",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "uz",
+  "categories": ["education", "games", "productivity"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "144x144",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "152x152",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "384x384",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "So'z qo'shish",
+      "short_name": "Qo'shish",
+      "description": "Yangi so'z qo'shish",
+      "url": "/?page=add-word",
+      "icons": [
+        {
+          "src": "icons/icon.svg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Test boshlash",
+      "short_name": "Test",
+      "description": "So'zlar testini boshlash",
+      "url": "/?page=test",
+      "icons": [
+        {
+          "src": "icons/icon.svg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Mashq qilish",
+      "short_name": "Mashq",
+      "description": "So'zlarni mashq qilish",
+      "url": "/?page=practice",
+      "icons": [
+        {
+          "src": "icons/icon.svg",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}
