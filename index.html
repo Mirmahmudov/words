@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>📘 My English Words</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <h1 class="nav-title">📘 My English Words</h1>
+        <div class="nav-menu">
+          <button class="nav-btn active" data-page="home">Bosh sahifa</button>
+          <button class="nav-btn" data-page="add-word">So'z qo'shish</button>
+          <button class="nav-btn" data-page="word-list">
+            So'zlar ro'yxati
+          </button>
+          <button class="nav-btn" data-page="test">Test</button>
+          <button class="nav-btn" data-page="practice">Mashq</button>
+          <button class="nav-btn" data-page="stats">Statistika</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <!-- Home Page -->
+      <div id="home" class="page active">
+        <div class="hero">
+          <h2>🎯 Inglizcha so'zlarni o'yin orqali yodlang!</h2>
+          <p>So'zlaringizni qo'shing va test orqali yodlang</p>
+          <div class="stats-overview">
+            <div class="stat-card">
+              <span class="stat-number" id="total-words">0</span>
+              <span class="stat-label">Jami so'zlar</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="learned-words">0</span>
+              <span class="stat-label">Yodlangan</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="showPage('add-word')">
+            So'z qo'shish
+          </button>
+          <button class="btn btn-secondary" onclick="showPage('test')">
+            Test boshlash
+          </button>
+        </div>
+      </div>
+
+      <!-- Add Word Page -->
+      <div id="add-word" class="page">
+        <div class="form-container">
+          <h2>📥 Yangi so'z qo'shish</h2>
+
+          <!-- Single Word Form -->
+          <div class="add-method">
+            <h3>Bitta so'z qo'shish</h3>
+            <form id="add-word-form">
+              <div class="input-group">
+                <input
+                  type="text"
+                  id="english-input"
+                  placeholder="English so'z"
+                  required
+                />
+              </div>
+              <div class="input-group">
+                <input
+                  type="text"
+                  id="uzbek-input"
+                  placeholder="O'zbekcha tarjima"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">Qo'shish</button>
+            </form>
+          </div>
+
+          <div class="divider">
+            <span>yoki</span>
+          </div>
+
+          <!-- Bulk Import -->
+          <div class="add-method">
+            <h3>Ko'p so'zlarni birdan qo'shish</h3>
+            <p class="help-text">JSON array formatida so'zlarni kiriting:</p>
+            <div class="example-format">
+              <strong>Misol format:</strong>
+              <code
+                >[{"english": "apple", "uzbek": "olma"}, {"english": "book",
+                "uzbek": "kitob"}]</code
+              >
+            </div>
+            <div class="input-group">
+              <textarea
+                id="bulk-input"
+                placeholder='[{"english": "apple", "uzbek": "olma"}, {"english": "book", "uzbek": "kitob"}]'
+                rows="6"
+              ></textarea>
+            </div>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="importBulkWords()"
+            >
+              Ko'p so'zlarni import qilish
+            </button>
+          </div>
+
+          <!-- Quick Add Buttons -->
+          <div class="quick-add">
+            <h3>Tez qo'shish</h3>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="addSampleWords()"
+            >
+              Namuna so'zlarni qo'shish
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Word List Page -->
+      <div id="word-list" class="page">
+        <div class="list-container">
+          <h2>📋 So'zlar ro'yxati</h2>
+          <div id="words-container">
+            <!-- Words will be dynamically added here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Page -->
+      <div id="test" class="page">
+        <div class="test-container">
+          <div id="test-start" class="test-start">
+            <h2>🧪 Test boshlash</h2>
+            <p>10 ta savoldan iborat test</p>
+            <button class="btn btn-primary" onclick="startTest()">
+              Testni boshlash
+            </button>
+          </div>
+
+          <div id="test-game" class="test-game hidden">
+            <div class="test-header">
+              <span class="question-counter"
+                >Savol <span id="current-question">1</span>/10</span
+              >
+              <span class="score">Ball: <span id="current-score">0</span></span>
+            </div>
+            <div class="question-card">
+              <h3 id="question-text">What is the meaning of "apple"?</h3>
+              <div class="options" id="options-container">
+                <!-- Options will be dynamically added -->
+              </div>
+            </div>
+          </div>
+
+          <div id="test-result" class="test-result hidden">
+            <h2>🎉 Test yakunlandi!</h2>
+            <div class="result-score">
+              <span class="score-percentage" id="final-score">80%</span>
+              <p>
+                Siz <span id="correct-answers">8</span>/10 ta savolga to'g'ri
+                javob berdingiz
+              </p>
+            </div>
+            <button class="btn btn-primary" onclick="resetTest()">
+              Qayta test topshirish
+            </button>
+            <button class="btn btn-secondary" onclick="showPage('home')">
+              Bosh sahifaga qaytish
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Practice Page -->
+      <div id="practice" class="page">
+        <div class="practice-container">
+          <h2>🧠 Mashq rejimi</h2>
+          <div id="practice-game">
+            <div class="practice-card">
+              <h3 id="practice-word">apple</h3>
+              <input
+                type="text"
+                id="practice-input"
+                placeholder="Tarjimasini yozing..."
+              />
+              <button class="btn btn-primary" onclick="checkPracticeAnswer()">
+                Tekshirish
+              </button>
+              <div id="practice-feedback" class="feedback hidden"></div>
+              <button class="btn btn-secondary" onclick="nextPracticeWord()">
+                Keyingi so'z
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Page -->
+      <div id="stats" class="page">
+        <div class="stats-container">
+          <h2>📊 Statistika</h2>
+          <div class="progress-section">
+            <h3>O'rganish jarayoni</h3>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p><span id="learned-percentage">0</span>% so'zlar yodlangan</p>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-value" id="stats-total">0</span>
+              <span class="stat-name">Jami so'zlar</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="stats-learned">0</span>
+              <span class="stat-name">Yodlangan</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="stats-accuracy">0%</span>
+              <span class="stat-name">Aniqlik</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
