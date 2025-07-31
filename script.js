@@ -21,6 +21,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize PWA
   initializePWA();
 
+  // Initialize theme
+  initializeTheme();
+
   // Handle URL parameters for shortcuts
   handleURLParameters();
 });
@@ -31,7 +34,7 @@ function initializePWA() {
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker
-        .register("/sw.js")
+        .register("./sw.js")
         .then((registration) => {
           console.log("SW registered: ", registration);
 
@@ -204,6 +207,36 @@ function hideOfflineIndicator() {
   if (offlineIndicator) {
     offlineIndicator.remove();
   }
+}
+
+// Theme Toggle
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // Update theme toggle icon
+    const themeToggle = document.querySelector('.theme-toggle');
+    themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    
+    // Update manifest theme color
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+        themeColorMeta.content = newTheme === 'dark' ? '#1e293b' : '#4f46e5';
+    }
+}
+
+// Initialize theme
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    const themeToggle = document.querySelector('.theme-toggle');
+    if (themeToggle) {
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    }
 }
 
 // Show notification

@@ -1,12 +1,12 @@
 // Service Worker for My English Words PWA
 const CACHE_NAME = 'my-english-words-v1.0.0';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/script.js',
-  '/manifest.json',
-  '/icons/icon.svg'
+  './',
+  './index.html',
+  './style.css',
+  './script.js',
+  './manifest.json',
+  './icons/icon.svg'
 ];
 
 // Install event - cache resources
@@ -93,7 +93,7 @@ self.addEventListener('fetch', event => {
         
         // Return offline page for navigation requests
         if (event.request.destination === 'document') {
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         }
       })
   );
@@ -117,8 +117,8 @@ self.addEventListener('push', event => {
   
   const options = {
     body: event.data ? event.data.text() : 'Yangi so\'zlarni yodlash vaqti keldi!',
-    icon: '/icons/icon.svg',
-    badge: '/icons/icon.svg',
+    icon: './icons/icon.svg',
+    badge: './icons/icon.svg',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -128,12 +128,12 @@ self.addEventListener('push', event => {
       {
         action: 'explore',
         title: 'Testni boshlash',
-        icon: '/icons/icon.svg'
+        icon: './icons/icon.svg'
       },
       {
         action: 'close',
         title: 'Yopish',
-        icon: '/icons/icon.svg'
+        icon: './icons/icon.svg'
       }
     ]
   };
@@ -152,7 +152,7 @@ self.addEventListener('notificationclick', event => {
   if (event.action === 'explore') {
     // Open the app and navigate to test page
     event.waitUntil(
-      clients.openWindow('/?page=test')
+      clients.openWindow('./?page=test')
     );
   } else if (event.action === 'close') {
     // Just close the notification
@@ -160,7 +160,7 @@ self.addEventListener('notificationclick', event => {
   } else {
     // Default action - open the app
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow('./')
     );
   }
 });
