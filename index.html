@@ -38,16 +38,14 @@
       <div class="nav-container">
         <h1 class="nav-title">📘 My English Words</h1>
         <div class="nav-actions">
-          <button class="theme-toggle" onclick="toggleTheme()" title="Theme o'zgartirish">
-            🌙
-          </button>
+          <button class="burger" aria-label="Menu" onclick="toggleMenu()">☰</button>
+          <button class="mode-toggle" onclick="toggleMode()" title="Tarjima yo'nalishi" id="mode-toggle">EN→UZ</button>
+          <button class="theme-toggle" onclick="toggleTheme()" title="Theme o'zgartirish">🌙</button>
         </div>
-        <div class="nav-menu"></div>
+        <div class="nav-menu">
           <button class="nav-btn active" data-page="home">Bosh sahifa</button>
           <button class="nav-btn" data-page="add-word">So'z qo'shish</button>
-          <button class="nav-btn" data-page="word-list">
-            So'zlar ro'yxati
-          </button>
+          <button class="nav-btn" data-page="word-list">So'zlar ro'yxati</button>
           <button class="nav-btn" data-page="test">Test</button>
           <button class="nav-btn" data-page="practice">Mashq</button>
           <button class="nav-btn" data-page="stats">Statistika</button>
@@ -56,6 +54,27 @@
     </nav>
 
     <main class="main-content">
+      <!-- Mobile Nav Modal -->
+      <div id="mobile-nav-overlay" class="mobile-nav-overlay hidden" onclick="closeMobileNav(event)">
+        <div class="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu">
+          <div class="mobile-nav-header">
+            <span class="mobile-title">📘 My English Words</span>
+            <button class="mobile-close" aria-label="Yopish" onclick="closeMobileNav()">✕</button>
+          </div>
+          <div class="mobile-actions">
+            <button class="mode-toggle" onclick="toggleMode()" id="mode-toggle-mobile">EN→UZ</button>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+          </div>
+          <div class="mobile-links">
+            <button class="nav-btn" data-page="home" onclick="mobileNavigate('home')">Bosh sahifa</button>
+            <button class="nav-btn" data-page="add-word" onclick="mobileNavigate('add-word')">So'z qo'shish</button>
+            <button class="nav-btn" data-page="word-list" onclick="mobileNavigate('word-list')">So'zlar ro'yxati</button>
+            <button class="nav-btn" data-page="test" onclick="mobileNavigate('test')">Test</button>
+            <button class="nav-btn" data-page="practice" onclick="mobileNavigate('practice')">Mashq</button>
+            <button class="nav-btn" data-page="stats" onclick="mobileNavigate('stats')">Statistika</button>
+          </div>
+        </div>
+      </div>
       <!-- Home Page -->
       <div id="home" class="page active">
         <div class="hero">
@@ -178,7 +197,7 @@
           <div id="test-game" class="test-game hidden">
             <div class="test-header">
               <span class="question-counter"
-                >Savol <span id="current-question">1</span>/10</span
+                >Savol <span id="current-question">1</span>/<span id="total-questions">10</span></span
               >
               <span class="score">Ball: <span id="current-score">0</span></span>
             </div>
@@ -195,7 +214,7 @@
             <div class="result-score">
               <span class="score-percentage" id="final-score">80%</span>
               <p>
-                Siz <span id="correct-answers">8</span>/10 ta savolga to'g'ri
+                Siz <span id="correct-answers">8</span>/<span id="total-questions-result">10</span> ta savolga to'g'ri
                 javob berdingiz
               </p>
             </div>

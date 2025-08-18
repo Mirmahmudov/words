@@ -4,6 +4,8 @@ let currentTest = [];
 let currentQuestionIndex = 0;
 let currentScore = 0;
 let currentPracticeWord = null;
+let translationMode = localStorage.getItem('translationMode') || 'en-uz'; // 'en-uz' or 'uz-en'
+let testStage = 'start'; // 'start' | 'game' | 'result'
 let userStats = {
   totalTests: 0,
   correctAnswers: 0,
@@ -16,7 +18,9 @@ document.addEventListener("DOMContentLoaded", function () {
   loadStats();
   updateHomeStats();
   setupEventListeners();
-  showPage("home");
+  // Restore last page
+  const lastPage = localStorage.getItem('lastPage') || 'home';
+  showPage(lastPage);
 
   // Initialize PWA
   initializePWA();
@@ -26,6 +30,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Handle URL parameters for shortcuts
   handleURLParameters();
+  // Initialize mode toggle label
+  updateModeToggleLabel();
+
+  // If we were on test page, try restoring test state
+  if ((localStorage.getItem('lastPage') || 'home') === 'test') {
+    restoreTestStateIfAny();
+  }
 });
 
 // PWA Initialization
@@ -59,11 +70,11 @@ function initializePWA() {
   }
 
   // Handle install prompt
-  let deferredPrompt;
+  window.deferredPrompt = null;
   window.addEventListener("beforeinstallprompt", (e) => {
     console.log("PWA install prompt triggered");
     e.preventDefault();
-    deferredPrompt = e;
+    window.deferredPrompt = e;
     showInstallButton();
   });
 
@@ -114,11 +125,11 @@ function showInstallButton() {
   installBtn.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
 
   installBtn.addEventListener("click", async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
+    if (window.deferredPrompt) {
+      window.deferredPrompt.prompt();
+      const { outcome } = await window.deferredPrompt.userChoice;
       console.log(`User response to the install prompt: ${outcome}`);
-      deferredPrompt = null;
+      window.deferredPrompt = null;
       hideInstallButton();
     }
   });
@@ -285,6 +296,7 @@ function setupEventListeners() {
     btn.addEventListener("click", function () {
       const page = this.getAttribute("data-page");
       showPage(page);
+      closeMobileNav();
     });
   });
 
@@ -322,6 +334,9 @@ function showPage(pageId) {
   });
   document.querySelector(`[data-page="${pageId}"]`).classList.add("active");
 
+  // Persist current page
+  localStorage.setItem('lastPage', pageId);
+
   // Load page-specific content
   switch (pageId) {
     case "home":
@@ -337,6 +352,71 @@ function showPage(pageId) {
       updateStatistics();
       break;
   }
+}
+
+// Translation mode toggle
+function toggleMode() {
+  translationMode = translationMode === 'en-uz' ? 'uz-en' : 'en-uz';
+  localStorage.setItem('translationMode', translationMode);
+  updateModeToggleLabel();
+
+  // If user is in test or practice, refresh current view accordingly
+  const currentPage = localStorage.getItem('lastPage');
+  if (currentPage === 'test') {
+    // If a test is running, rebuild current question with new direction
+    if (!document.getElementById('test-start').classList.contains('hidden')) {
+      // not started yet; just update UI when it starts
+    } else if (!document.getElementById('test-game').classList.contains('hidden')) {
+      showQuestion();
+    }
+  } else if (currentPage === 'practice') {
+    // Refresh practice word prompt
+    if (currentPracticeWord) {
+      document.getElementById('practice-word').textContent = translationMode === 'en-uz' ? currentPracticeWord.english : currentPracticeWord.uzbek;
+      document.getElementById('practice-input').placeholder = translationMode === 'en-uz' ? "Tarjimasini yozing..." : "Write the translation...";
+    }
+  }
+}
+
+function updateModeToggleLabel() {
+  const el = document.getElementById('mode-toggle');
+  if (el) {
+    el.textContent = translationMode === 'en-uz' ? 'EN→UZ' : 'UZ→EN';
+    el.title = translationMode === 'en-uz' ? "Savollar inglizcha, javoblar o'zbekcha" : "Savollar o'zbekcha, javoblar inglizcha";
+  }
+  const mobileEl = document.getElementById('mode-toggle-mobile');
+  if (mobileEl) {
+    mobileEl.textContent = translationMode === 'en-uz' ? 'EN→UZ' : 'UZ→EN';
+  }
+}
+
+// Mobile burger menu modal
+function toggleMenu() {
+  const overlay = document.getElementById('mobile-nav-overlay');
+  if (!overlay) return;
+  const isHidden = overlay.classList.contains('hidden');
+  if (isHidden) {
+    overlay.classList.remove('hidden');
+    document.body.classList.add('no-scroll');
+    updateModeToggleLabel();
+  } else {
+    overlay.classList.add('hidden');
+    document.body.classList.remove('no-scroll');
+  }
+}
+
+function closeMobileNav(e) {
+  const overlay = document.getElementById('mobile-nav-overlay');
+  if (!overlay) return;
+  if (!e || e.target === overlay) {
+    overlay.classList.add('hidden');
+    document.body.classList.remove('no-scroll');
+  }
+}
+
+function mobileNavigate(pageId) {
+  showPage(pageId);
+  closeMobileNav();
 }
 
 // LocalStorage functions
@@ -577,8 +657,8 @@ function displayWords() {
 
 // Test Functions
 function startTest() {
-  if (words.length < 4) {
-    alert("Test uchun kamida 4 ta so'z kerak!");
+  if (words.length < 2) {
+    alert("Test uchun kamida 2 ta so'z kerak!");
     return;
   }
 
@@ -592,11 +672,14 @@ function startTest() {
     .sort(() => Math.random() - 0.5)
     .slice(0, Math.min(10, words.length));
   currentTest = testWords;
+  updateTestTotalsUI();
 
   // Show test game
   document.getElementById("test-start").classList.add("hidden");
   document.getElementById("test-game").classList.remove("hidden");
   document.getElementById("test-result").classList.add("hidden");
+  testStage = 'game';
+  persistTestState();
 
   showQuestion();
 }
@@ -608,13 +691,16 @@ function showQuestion() {
   }
 
   const currentWord = currentTest[currentQuestionIndex];
-  const questionText = `What is the meaning of "${currentWord.english}"?`;
+  const isEnUz = translationMode === 'en-uz';
+  const questionText = isEnUz 
+    ? `What is the meaning of "${currentWord.english}"?`
+    : `"${currentWord.uzbek}" so'zining inglizchasini toping`;
 
   // Generate options
-  const correctAnswer = currentWord.uzbek;
+  const correctAnswer = isEnUz ? currentWord.uzbek : currentWord.english;
   const wrongAnswers = words
     .filter((word) => word.id !== currentWord.id)
-    .map((word) => word.uzbek)
+    .map((word) => isEnUz ? word.uzbek : word.english)
     .sort(() => Math.random() - 0.5)
     .slice(0, 3);
 
@@ -627,15 +713,17 @@ function showQuestion() {
     currentQuestionIndex + 1;
   document.getElementById("current-score").textContent = currentScore;
   document.getElementById("question-text").textContent = questionText;
+  updateTestTotalsUI();
 
   const optionsContainer = document.getElementById("options-container");
-  optionsContainer.innerHTML = allOptions
-    .map(
-      (option) => `
-        <button class="option-btn" onclick="selectAnswer('${option}', '${correctAnswer}')">${option}</button>
-    `
-    )
-    .join("");
+  optionsContainer.innerHTML = '';
+  allOptions.forEach((option) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = option;
+    btn.addEventListener('click', () => selectAnswer(option, correctAnswer));
+    optionsContainer.appendChild(btn);
+  });
 }
 
 function selectAnswer(selectedAnswer, correctAnswer) {
@@ -678,6 +766,7 @@ function selectAnswer(selectedAnswer, correctAnswer) {
   // Move to next question after delay
   setTimeout(() => {
     currentQuestionIndex++;
+    persistTestState();
     showQuestion();
   }, 1500);
 }
@@ -696,13 +785,18 @@ function endTest() {
   document.getElementById("test-result").classList.remove("hidden");
   document.getElementById("final-score").textContent = percentage + "%";
   document.getElementById("correct-answers").textContent = currentScore;
+  updateTestTotalsUI();
 
   updateHomeStats();
+  testStage = 'result';
+  persistTestState();
 }
 
 function resetTest() {
   document.getElementById("test-result").classList.add("hidden");
   document.getElementById("test-start").classList.remove("hidden");
+  testStage = 'start';
+  clearTestState();
 }
 
 // Practice Functions
@@ -724,9 +818,10 @@ function startPractice() {
 function nextPracticeWord() {
   currentPracticeWord = words[Math.floor(Math.random() * words.length)];
   document.getElementById("practice-word").textContent =
-    currentPracticeWord.english;
+    translationMode === 'en-uz' ? currentPracticeWord.english : currentPracticeWord.uzbek;
   document.getElementById("practice-input").value = "";
   document.getElementById("practice-feedback").classList.add("hidden");
+  document.getElementById("practice-input").placeholder = translationMode === 'en-uz' ? "Tarjimasini yozing..." : "Write the translation...";
 }
 
 function checkPracticeAnswer() {
@@ -734,7 +829,7 @@ function checkPracticeAnswer() {
     .getElementById("practice-input")
     .value.trim()
     .toLowerCase();
-  const correctAnswer = currentPracticeWord.uzbek.toLowerCase();
+  const correctAnswer = (translationMode === 'en-uz' ? currentPracticeWord.uzbek : currentPracticeWord.english).toLowerCase();
   const feedback = document.getElementById("practice-feedback");
 
   if (!userAnswer) {
@@ -756,13 +851,90 @@ function checkPracticeAnswer() {
       currentPracticeWord.learned = true;
     }
   } else {
-    feedback.textContent = `❌ Noto'g'ri. To'g'ri javob: ${currentPracticeWord.uzbek}`;
+    const correctText = translationMode === 'en-uz' ? currentPracticeWord.uzbek : currentPracticeWord.english;
+    feedback.textContent = `❌ Noto'g'ri. To'g'ri javob: ${correctText}`;
     feedback.className = "feedback incorrect";
     currentPracticeWord.totalAttempts++;
   }
 
   saveWords();
   updateHomeStats();
+}
+
+// --- Test state persistence ---
+function persistTestState() {
+  try {
+    const state = {
+      testStage,
+      currentScore,
+      currentQuestionIndex,
+      translationMode,
+      testWordIds: currentTest.map(w => w.id),
+    };
+    localStorage.setItem('testState', JSON.stringify(state));
+  } catch (e) {}
+}
+
+function clearTestState() {
+  localStorage.removeItem('testState');
+}
+
+function restoreTestStateIfAny() {
+  try {
+    const raw = localStorage.getItem('testState');
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    if (!state || !Array.isArray(state.testWordIds)) return;
+
+    // Rebuild currentTest from saved ids
+    const idSet = new Set(state.testWordIds);
+    currentTest = words.filter(w => idSet.has(w.id));
+    // Keep original order as per saved ids
+    currentTest.sort((a, b) => state.testWordIds.indexOf(a.id) - state.testWordIds.indexOf(b.id));
+
+    currentScore = Number(state.currentScore) || 0;
+    currentQuestionIndex = Math.min(
+      Math.max(Number(state.currentQuestionIndex) || 0, 0),
+      Math.max(currentTest.length - 1, 0)
+    );
+    testStage = state.testStage || 'start';
+    // Respect saved translation mode
+    if (state.translationMode && (state.translationMode === 'en-uz' || state.translationMode === 'uz-en')) {
+      translationMode = state.translationMode;
+      localStorage.setItem('translationMode', translationMode);
+      updateModeToggleLabel();
+    }
+
+    // Reflect UI based on stage
+    if (testStage === 'game' && currentTest.length > 0) {
+      document.getElementById("test-start").classList.add("hidden");
+      document.getElementById("test-game").classList.remove("hidden");
+      document.getElementById("test-result").classList.add("hidden");
+      updateTestTotalsUI();
+      showQuestion();
+    } else if (testStage === 'result') {
+      document.getElementById("test-start").classList.add("hidden");
+      document.getElementById("test-game").classList.add("hidden");
+      document.getElementById("test-result").classList.remove("hidden");
+      const percentage = currentTest.length > 0 ? Math.round((currentScore / currentTest.length) * 100) : 0;
+      document.getElementById("final-score").textContent = percentage + "%";
+      document.getElementById("correct-answers").textContent = currentScore;
+      updateTestTotalsUI();
+    } else {
+      document.getElementById("test-start").classList.remove("hidden");
+      document.getElementById("test-game").classList.add("hidden");
+      document.getElementById("test-result").classList.add("hidden");
+    }
+  } catch (e) {}
+}
+
+// Update total questions UI safely
+function updateTestTotalsUI() {
+  const totalEl = document.getElementById('total-questions');
+  const totalResEl = document.getElementById('total-questions-result');
+  const total = Array.isArray(currentTest) ? currentTest.length : 0;
+  if (totalEl) totalEl.textContent = total;
+  if (totalResEl) totalResEl.textContent = total;
 }
 
 // Statistics Functions
