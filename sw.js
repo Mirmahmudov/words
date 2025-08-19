@@ -1,5 +1,5 @@
 // Service Worker for My English Words PWA
-const CACHE_NAME = 'my-english-words-v1.0.0';
+const CACHE_NAME = 'my-english-words-v1.1.0';
 const urlsToCache = [
   './',
   './index.html',

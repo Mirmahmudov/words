@@ -1,6 +1,7 @@
 {
   "name": "My English Words - Inglizcha So'zlar",
   "short_name": "English Words",
+  "version": "1.1.0",
   "description": "Inglizcha so'zlarni o'yin orqali yodlash uchun dastur",
   "start_url": "./",
   "display": "standalone",
@@ -73,6 +74,18 @@
       "short_name": "Mashq",
       "description": "So'zlarni mashq qilish",
       "url": "./?page=practice",
+      "icons": [
+        {
+          "src": "./icons/icon.svg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Noto'g'ri fellar",
+      "short_name": "Fellar",
+      "description": "Noto'g'ri fellelarni o'rganish",
+      "url": "./?page=wrong-words",
       "icons": [
         {
           "src": "./icons/icon.svg",

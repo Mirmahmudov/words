@@ -49,6 +49,7 @@
           <button class="nav-btn" data-page="test">Test</button>
           <button class="nav-btn" data-page="practice">Mashq</button>
           <button class="nav-btn" data-page="stats">Statistika</button>
+          <button class="nav-btn" data-page="wrong-words">Noto'g'ri fellar</button>
         </div>
       </div>
     </nav>
@@ -72,6 +73,7 @@
             <button class="nav-btn" data-page="test" onclick="mobileNavigate('test')">Test</button>
             <button class="nav-btn" data-page="practice" onclick="mobileNavigate('practice')">Mashq</button>
             <button class="nav-btn" data-page="stats" onclick="mobileNavigate('stats')">Statistika</button>
+            <button class="nav-btn" data-page="wrong-words" onclick="mobileNavigate('wrong-words')">Noto'g'ri fellar</button>
           </div>
         </div>
       </div>
@@ -275,6 +277,60 @@
             <div class="stat-item">
               <span class="stat-value" id="stats-accuracy">0%</span>
               <span class="stat-name">Aniqlik</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wrong Words Page -->
+      <div id="wrong-words" class="page">
+        <div class="wrong-words-container">
+          <h2>❌ Noto'g'ri fellelar</h2>
+          <div class="wrong-words-stats">
+            <div class="stat-card">
+              <span class="stat-number" id="wrong-words-count">0</span>
+              <span class="stat-label">Noto'g'ri fellelar</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="wrong-words-accuracy">0%</span>
+              <span class="stat-label">Aniqlik</span>
+            </div>
+          </div>
+          
+          <div class="wrong-words-actions">
+            <button class="btn btn-primary" onclick="startWrongWordsTest()">Test boshlash</button>
+            <button class="btn btn-secondary" onclick="startWrongWordsPractice()">Mashq qilish</button>
+            <button class="btn btn-warning" onclick="resetWrongWordsProgress()">Progressni qayta boshlash</button>
+          </div>
+
+          <div id="wrong-words-list" class="wrong-words-list">
+            <!-- Noto'g'ri fellelar ro'yxati -->
+          </div>
+
+          <!-- Test rejimi -->
+          <div id="wrong-words-test" class="wrong-words-test hidden">
+            <div class="test-header">
+              <span class="question-counter">Savol <span id="wrong-test-current">1</span>/<span id="wrong-test-total">0</span></span>
+              <span class="score">Ball: <span id="wrong-test-score">0</span></span>
+            </div>
+            <div class="question-card">
+              <h3 id="wrong-test-question">Savol matni</h3>
+              <div class="options" id="wrong-test-options">
+                <!-- Variantlar -->
+              </div>
+            </div>
+            <button class="btn btn-secondary" onclick="exitWrongWordsTest()">Testni tugatish</button>
+          </div>
+
+          <!-- Mashq rejimi -->
+          <div id="wrong-words-practice" class="wrong-words-practice hidden">
+            <div class="practice-card">
+              <h3 id="wrong-practice-word">So'z</h3>
+              <input type="text" id="wrong-practice-input" placeholder="Tarjimasini yozing..." />
+              <button class="btn btn-primary" onclick="checkWrongPracticeAnswer()">Tekshirish</button>
+              <div id="wrong-practice-feedback" class="feedback hidden"></div>
+              <button class="btn btn-secondary" onclick="nextWrongPracticeWord()">Keyingi so'z</button>
+              <button class="btn btn-secondary" onclick="exitWrongWordsPractice()">Mashqni tugatish</button>
             </div>
           </div>
         </div>

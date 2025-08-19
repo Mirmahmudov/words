@@ -12,6 +12,13 @@ let userStats = {
   totalQuestions: 0,
 };
 
+// Wrong words variables
+let currentWrongTest = [];
+let currentWrongQuestionIndex = 0;
+let currentWrongScore = 0;
+let currentWrongPracticeWords = [];
+let currentWrongPracticeWord = null;
+
 // Initialize app
 document.addEventListener("DOMContentLoaded", function () {
   loadWords();
@@ -62,6 +69,9 @@ function initializePWA() {
               }
             });
           });
+
+          // Check if there's a new version and clear old cache
+          checkForUpdates(registration);
         })
         .catch((registrationError) => {
           console.log("SW registration failed: ", registrationError);
@@ -169,6 +179,46 @@ function showUpdateNotification() {
     `;
 
   document.body.appendChild(updateDiv);
+}
+
+// Check for updates and clear old cache
+function checkForUpdates(registration) {
+  // Get current version from manifest
+  fetch('./manifest.json')
+    .then(response => response.json())
+    .then(manifest => {
+      const currentVersion = manifest.version || 'v1.0.0';
+      const cachedVersion = localStorage.getItem('appVersion');
+      
+      if (cachedVersion && cachedVersion !== currentVersion) {
+        // New version detected, clear old cache
+        console.log('New version detected, clearing old cache...');
+        clearOldCache();
+        localStorage.setItem('appVersion', currentVersion);
+      } else if (!cachedVersion) {
+        localStorage.setItem('appVersion', currentVersion);
+      }
+    })
+    .catch(error => {
+      console.log('Could not check for updates:', error);
+    });
+}
+
+// Clear old cache
+function clearOldCache() {
+  if ('caches' in window) {
+    caches.keys().then(cacheNames => {
+      cacheNames.forEach(cacheName => {
+        if (cacheName.startsWith('my-english-words-')) {
+          caches.delete(cacheName);
+          console.log('Deleted old cache:', cacheName);
+        }
+      });
+    });
+  }
+  
+  // Clear localStorage data if needed (optional)
+  // localStorage.clear();
 }
 
 // Update app
@@ -350,6 +400,9 @@ function showPage(pageId) {
       break;
     case "stats":
       updateStatistics();
+      break;
+    case "wrong-words":
+      updateWrongWordsPage();
       break;
   }
 }
@@ -944,6 +997,243 @@ function updateHomeStats() {
 
   document.getElementById("total-words").textContent = totalWords;
   document.getElementById("learned-words").textContent = learnedWords;
+}
+
+// Wrong Words Functions
+function getWrongWords() {
+  return words.filter(word => word.totalAttempts > 0 && word.correctCount < word.totalAttempts);
+}
+
+function updateWrongWordsPage() {
+  const wrongWords = getWrongWords();
+  const wrongWordsCount = wrongWords.length;
+  const totalAttempts = wrongWords.reduce((sum, word) => sum + word.totalAttempts, 0);
+  const totalCorrect = wrongWords.reduce((sum, word) => sum + word.correctCount, 0);
+  const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+
+  // Update stats
+  document.getElementById('wrong-words-count').textContent = wrongWordsCount;
+  document.getElementById('wrong-words-accuracy').textContent = accuracy + '%';
+
+  // Update list
+  const listContainer = document.getElementById('wrong-words-list');
+  if (wrongWords.length === 0) {
+    listContainer.innerHTML = '<p class="text-center">Hozircha noto\'g\'ri fellelar yo\'q. Barcha so\'zlaringiz to\'g\'ri!</p>';
+    return;
+  }
+
+  listContainer.innerHTML = wrongWords.map(word => {
+    const wordAccuracy = word.totalAttempts > 0 ? Math.round((word.correctCount / word.totalAttempts) * 100) : 0;
+    return `
+      <div class="wrong-word-item">
+        <div class="wrong-word-content">
+          <span class="wrong-word-english">${word.english}</span>
+          <span> - </span>
+          <span class="wrong-word-uzbek">${word.uzbek}</span>
+        </div>
+        <div class="wrong-word-stats">
+          <span class="wrong-word-accuracy">${wordAccuracy}%</span>
+          <span>(${word.correctCount}/${word.totalAttempts})</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function startWrongWordsTest() {
+  const wrongWords = getWrongWords();
+  if (wrongWords.length < 2) {
+    alert('Test uchun kamida 2 ta noto\'g\'ri fellar kerak!');
+    return;
+  }
+
+  // Hide list and show test
+  document.getElementById('wrong-words-list').style.display = 'none';
+  document.getElementById('wrong-words-test').classList.remove('hidden');
+  
+  // Initialize test
+  currentWrongTest = [...wrongWords].sort(() => Math.random() - 0.5);
+  currentWrongQuestionIndex = 0;
+  currentWrongScore = 0;
+  
+  showWrongQuestion();
+}
+
+function showWrongQuestion() {
+  if (currentWrongQuestionIndex >= currentWrongTest.length) {
+    endWrongTest();
+    return;
+  }
+
+  const currentWord = currentWrongTest[currentWrongQuestionIndex];
+  const isEnUz = translationMode === 'en-uz';
+  const questionText = isEnUz 
+    ? `What is the meaning of "${currentWord.english}"?`
+    : `"${currentWord.uzbek}" so'zining inglizchasini toping`;
+
+  // Generate options
+  const correctAnswer = isEnUz ? currentWord.uzbek : currentWord.english;
+  const wrongAnswers = words
+    .filter(word => word.id !== currentWord.id)
+    .map(word => isEnUz ? word.uzbek : word.english)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3);
+
+  const allOptions = [correctAnswer, ...wrongAnswers].sort(() => Math.random() - 0.5);
+
+  // Update UI
+  document.getElementById('wrong-test-current').textContent = currentWrongQuestionIndex + 1;
+  document.getElementById('wrong-test-total').textContent = currentWrongTest.length;
+  document.getElementById('wrong-test-score').textContent = currentWrongScore;
+  document.getElementById('wrong-test-question').textContent = questionText;
+
+  const optionsContainer = document.getElementById('wrong-test-options');
+  optionsContainer.innerHTML = '';
+  allOptions.forEach(option => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = option;
+    btn.addEventListener('click', () => selectWrongAnswer(option, correctAnswer));
+    optionsContainer.appendChild(btn);
+  });
+}
+
+function selectWrongAnswer(selectedAnswer, correctAnswer) {
+  const buttons = document.querySelectorAll('#wrong-test-options .option-btn');
+  buttons.forEach(btn => btn.disabled = true);
+
+  const currentWord = currentWrongTest[currentWrongQuestionIndex];
+  currentWord.totalAttempts++;
+
+  if (selectedAnswer === correctAnswer) {
+    currentWrongScore++;
+    currentWord.correctCount++;
+    
+    if (currentWord.correctCount >= 3) {
+      currentWord.learned = true;
+    }
+
+    buttons.forEach(btn => {
+      if (btn.textContent === correctAnswer) {
+        btn.classList.add('correct');
+      }
+    });
+  } else {
+    buttons.forEach(btn => {
+      if (btn.textContent === correctAnswer) {
+        btn.classList.add('correct');
+      } else if (btn.textContent === selectedAnswer) {
+        btn.classList.add('incorrect');
+      }
+    });
+  }
+
+  saveWords();
+
+  setTimeout(() => {
+    currentWrongQuestionIndex++;
+    showWrongQuestion();
+  }, 1500);
+}
+
+function endWrongTest() {
+  const percentage = Math.round((currentWrongScore / currentWrongTest.length) * 100);
+  
+  alert(`Test yakunlandi! Siz ${currentWrongScore}/${currentWrongTest.length} ta savolga to'g'ri javob berdingiz (${percentage}%)`);
+  
+  exitWrongWordsTest();
+}
+
+function exitWrongWordsTest() {
+  document.getElementById('wrong-words-test').classList.add('hidden');
+  document.getElementById('wrong-words-list').style.display = 'block';
+  updateWrongWordsPage();
+}
+
+function startWrongWordsPractice() {
+  const wrongWords = getWrongWords();
+  if (wrongWords.length === 0) {
+    alert('Mashq qilish uchun noto\'g\'ri fellelar yo\'q!');
+    return;
+  }
+
+  // Hide list and show practice
+  document.getElementById('wrong-words-list').style.display = 'none';
+  document.getElementById('wrong-words-practice').classList.remove('hidden');
+  
+  currentWrongPracticeWords = [...wrongWords];
+  nextWrongPracticeWord();
+}
+
+function nextWrongPracticeWord() {
+  if (currentWrongPracticeWords.length === 0) {
+    alert('Barcha noto\'g\'ri fellelar bilan mashq qildingiz!');
+    exitWrongWordsPractice();
+    return;
+  }
+
+  const randomIndex = Math.floor(Math.random() * currentWrongPracticeWords.length);
+  currentWrongPracticeWord = currentWrongPracticeWords[randomIndex];
+  
+  document.getElementById('wrong-practice-word').textContent = 
+    translationMode === 'en-uz' ? currentWrongPracticeWord.english : currentWrongPracticeWord.uzbek;
+  document.getElementById('wrong-practice-input').value = '';
+  document.getElementById('wrong-practice-feedback').classList.add('hidden');
+}
+
+function checkWrongPracticeAnswer() {
+  const userAnswer = document.getElementById('wrong-practice-input').value.trim().toLowerCase();
+  const correctAnswer = (translationMode === 'en-uz' ? currentWrongPracticeWord.uzbek : currentWrongPracticeWord.english).toLowerCase();
+  const feedback = document.getElementById('wrong-practice-feedback');
+
+  if (!userAnswer) {
+    alert('Iltimos, javobni kiriting!');
+    return;
+  }
+
+  feedback.classList.remove('hidden');
+  currentWrongPracticeWord.totalAttempts++;
+
+  if (userAnswer === correctAnswer) {
+    feedback.textContent = '✅ To\'g\'ri! Ajoyib!';
+    feedback.className = 'feedback correct';
+    currentWrongPracticeWord.correctCount++;
+    
+    if (currentWrongPracticeWord.correctCount >= 3) {
+      currentWrongPracticeWord.learned = true;
+    }
+
+    // Remove from practice list if learned
+    if (currentWrongPracticeWord.learned) {
+      currentWrongPracticeWords = currentWrongPracticeWords.filter(w => w.id !== currentWrongPracticeWord.id);
+    }
+  } else {
+    const correctText = translationMode === 'en-uz' ? currentWrongPracticeWord.uzbek : currentWrongPracticeWord.english;
+    feedback.textContent = `❌ Noto'g'ri. To'g'ri javob: ${correctText}`;
+    feedback.className = 'feedback incorrect';
+  }
+
+  saveWords();
+}
+
+function exitWrongWordsPractice() {
+  document.getElementById('wrong-words-practice').classList.add('hidden');
+  document.getElementById('wrong-words-list').style.display = 'block';
+  updateWrongWordsPage();
+}
+
+function resetWrongWordsProgress() {
+  if (confirm('Haqiqatan ham barcha so\'zlarning progressini qayta boshlashni xohlaysizmi? Bu amalni qaytarib bo\'lmaydi.')) {
+    words.forEach(word => {
+      word.learned = false;
+      word.correctCount = 0;
+      word.totalAttempts = 0;
+    });
+    saveWords();
+    updateWrongWordsPage();
+    updateHomeStats();
+    alert('Progress muvaffaqiyatli qayta boshlandi!');
+  }
 }
 
 function updateStatistics() {

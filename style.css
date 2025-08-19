@@ -1353,3 +1353,101 @@ date remaining elements with new color scheme */
 .offline-indicator {
     background: var(--error-color) !important;
 }
+
+/* Wrong Words Page */
+.wrong-words-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.wrong-words-container h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--error-color);
+}
+
+.wrong-words-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.wrong-words-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.wrong-words-list {
+    background: var(--surface-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    margin-bottom: 2rem;
+}
+
+.wrong-word-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.3s ease;
+}
+
+.wrong-word-item:last-child {
+    border-bottom: none;
+}
+
+.wrong-word-item:hover {
+    background: var(--background-color);
+}
+
+.wrong-word-content {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.wrong-word-english {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.wrong-word-uzbek {
+    color: var(--text-secondary);
+}
+
+.wrong-word-stats {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.wrong-word-accuracy {
+    color: var(--warning-color);
+}
+
+.wrong-words-test,
+.wrong-words-practice {
+    background: var(--surface-color);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+.btn-warning {
+    background: var(--warning-color);
+    color: white;
+    border: none;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+    transform: translateY(-2px);
+}

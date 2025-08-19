@@ -17,6 +17,7 @@ Inglizcha so'zlarni o'yin orqali yodlash uchun Progressive Web App (PWA).
 - **Mashq rejimi** - Tarjimani yozish orqali mashq qilish
 - **Statistika** - O'rganish jarayonini kuzatish
 - **So'zlar ro'yxati** - Barcha so'zlarni ko'rish va boshqarish
+- **Noto'g'ri fellelar** - Xatolarni o'rganish va mashq qilish
 
 ## 📁 Fayl Tuzilmasi
 
@@ -125,6 +126,11 @@ So'zlarni JSON formatida import qilish:
 
 PWA avtomatik yangilanishlarni tekshiradi va foydalanuvchiga xabar beradi.
 
+### Cache Yangilash
+- Yangi versiya yuklanganda eski cache avtomatik tozalanadi
+- Service Worker versiyasi yangilanadi
+- Eski ma'lumotlar saqlanadi, faqat cache tozalanadi
+
 ## 🤝 Hissa Qo'shish
 
 1. Repository'ni fork qiling
@@ -138,6 +144,21 @@ MIT License - bepul foydalanish uchun.
 ## 🆘 Yordam
 
 Muammolar yoki savollar bo'lsa, GitHub Issues'da yozing.
+
+---
+
+## 📝 Yangi Versiya (v1.1.0)
+
+### ✨ Yangi Xususiyatlar
+- **Noto'g'ri fellelar sahifasi** - Xatolarni alohida o'rganish
+- **Cache yangilash** - Yangi versiya uchun avtomatik cache tozalash
+- **Yaxshilangan UI** - Yangi tugmalar va stillar
+- **Progress qayta boshlash** - Barcha progressni qayta boshlash imkoniyati
+
+### 🐛 Tuzatilgan Muammolar
+- Eski versiya qolib ketish muammosi hal qilindi
+- Service Worker cache versiyasi yangilandi
+- Yangi sahifalar uchun navigation qo'shildi
 
 ---
 
